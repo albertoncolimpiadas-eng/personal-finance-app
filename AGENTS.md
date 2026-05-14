@@ -30,7 +30,7 @@ The application must be accessible from the browser.
 
 - Backend: Python, FastAPI, SQLModel, SQLite.
 - Frontend: React, Vite, TypeScript.
-- Database: SQLite stored in `/data/finance.db` inside the backend container.
+- Database: SQLite stored in `/app/data/finance.db` inside the backend container.
 - Local database path: `./data/finance.db`.
 - Containerization: Docker Compose.
 - Deployment target for now: local machine only.

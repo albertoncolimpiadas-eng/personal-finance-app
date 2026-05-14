@@ -7,7 +7,7 @@ Local-first personal finance web app scaffold.
 - Backend: Python, FastAPI, SQLModel, SQLite
 - Frontend: React, Vite, TypeScript
 - Runtime: Docker Compose with Docker Engine inside Rocky Linux on WSL2
-- Database file: `./data/finance.db`, mounted in the backend container as `/data/finance.db`
+- Database file: `./data/finance.db`, mounted in the backend container as `/app/data/finance.db`
 
 This project does not use Docker Desktop, Kubernetes, cloud deployment, bank synchronization, multi-user authentication, PostgreSQL, or microservices.
 
@@ -63,8 +63,9 @@ docker compose up --build
 
 Then open:
 
-- Frontend: http://localhost:5173
+- Frontend: http://localhost:8080
 - Backend health check: http://localhost:8000/health
+- Backend API docs: http://localhost:8000/docs
 
 Stop the app with:
 
@@ -75,19 +76,26 @@ docker compose down
 ## Manual Test
 
 1. Start the app with `docker compose up --build`.
-2. Visit http://localhost:5173 and confirm the React app loads.
+2. Visit http://localhost:8080 and confirm the React app loads.
 3. Visit http://localhost:8000/health and confirm it returns:
 
 ```json
-{"status":"ok"}
+{"status":"ok","service":"personal-finance-backend"}
 ```
 
-4. Confirm the local SQLite persistence folder exists at `./data`.
+4. Visit http://localhost:8000/docs and confirm the FastAPI documentation opens.
+5. Confirm the local SQLite persistence folder exists at `./data`.
 
 Backend tests can be run inside the backend container once dependencies are built:
 
 ```bash
 docker compose run --rm backend pytest
+```
+
+To start only the backend service:
+
+```bash
+docker compose up --build backend
 ```
 
 ## Rocky Linux Notes
