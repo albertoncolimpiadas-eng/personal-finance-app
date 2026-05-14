@@ -7,7 +7,7 @@ Local-first personal finance web app scaffold.
 - Backend: Python, FastAPI, SQLModel, SQLite
 - Frontend: React, Vite, TypeScript
 - Runtime: Docker Compose with Docker Engine inside Rocky Linux on WSL2
-- Database file: `./data/finance.db`, mounted in the backend container as `/app/data/finance.db`
+- Database file: `./data/finance.db`, mounted in the backend container as `/data/finance.db`
 
 This project does not use Docker Desktop, Kubernetes, cloud deployment, bank synchronization, multi-user authentication, PostgreSQL, or microservices.
 
@@ -25,15 +25,24 @@ This project does not use Docker Desktop, Kubernetes, cloud deployment, bank syn
 │   │   │   └── health.py
 │   │   ├── schemas/
 │   │   └── services/
+│   ├── tests/
+│   │   └── test_health.py
 │   ├── Dockerfile
 │   └── requirements.txt
 ├── data/
 │   └── .gitkeep
 ├── frontend/
 │   ├── src/
+│   │   ├── api/
+│   │   │   └── client.ts
+│   │   ├── components/
+│   │   ├── pages/
+│   │   │   └── HomePage.tsx
+│   │   ├── types/
 │   │   ├── App.tsx
 │   │   ├── main.tsx
-│   │   └── styles.css
+│   │   ├── styles.css
+│   │   └── vite-env.d.ts
 │   ├── Dockerfile
 │   ├── index.html
 │   ├── package.json
@@ -74,6 +83,12 @@ docker compose down
 ```
 
 4. Confirm the local SQLite persistence folder exists at `./data`.
+
+Backend tests can be run inside the backend container once dependencies are built:
+
+```bash
+docker compose run --rm backend pytest
+```
 
 ## Rocky Linux Notes
 
