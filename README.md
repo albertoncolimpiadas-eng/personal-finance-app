@@ -201,6 +201,45 @@ Example transfer request:
 }
 ```
 
+## Budgets API
+
+Monthly budgets can be managed from the FastAPI docs at http://localhost:8000/docs.
+
+Available endpoints:
+
+- `GET /budgets`
+- `GET /budgets/monthly-summary?year=YYYY&month=M`
+- `GET /budgets/{budget_id}`
+- `POST /budgets`
+- `PUT /budgets/{budget_id}`
+- `DELETE /budgets/{budget_id}`
+
+Budgets are allowed only for expense categories, and only one budget can exist for each category/year/month.
+
+Example create request:
+
+```json
+{
+  "category_id": 1,
+  "year": 2026,
+  "month": 5,
+  "limit_amount": "500.00"
+}
+```
+
+## Dashboard API
+
+Dashboard summaries are calculated from transactions and account balances.
+
+Available endpoints:
+
+- `GET /dashboard/monthly-summary?year=YYYY&month=M`
+- `GET /dashboard/yearly-summary?year=YYYY`
+
+Monthly summary returns total income, total expense, net savings, savings rate, category breakdowns, and account balances.
+
+Yearly summary returns one aggregate row per month.
+
 Backend tests can be run inside the backend container once dependencies are built:
 
 ```bash

@@ -1,6 +1,6 @@
 from app.models.account import Account, AccountType
+from app.models.budget import Budget
 from app.models.category import Category, CategoryType
-from app.models.finance import Budget
 from app.models.transaction import Transaction, TransactionType
 
 __all__ = [
