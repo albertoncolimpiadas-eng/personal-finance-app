@@ -69,6 +69,8 @@ Then open:
 - Backend health check: http://localhost:8000/health
 - Backend API docs: http://localhost:8000/docs
 
+The frontend includes pages for Dashboard, Accounts, Transactions, Categories, Budgets, and Import. It checks `GET /health` and shows backend reachability in the header.
+
 Stop the app with:
 
 ```bash
