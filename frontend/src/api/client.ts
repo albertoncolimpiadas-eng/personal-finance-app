@@ -10,6 +10,8 @@ import type {
   HealthStatus,
   Transaction,
   TransactionCreate,
+  TransactionCsvImportResult,
+  TransactionCsvPreview,
   TransactionFilters,
 } from "../types";
 
@@ -34,6 +36,21 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (response.status === 204) {
     return undefined as T;
+  }
+
+  return response.json() as Promise<T>;
+}
+
+async function upload<T>(path: string, file: File): Promise<T> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch(buildApiUrl(path), {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
   }
 
   return response.json() as Promise<T>;
@@ -95,4 +112,10 @@ export const api = {
     request<DashboardMonthlySummary>(
       `/dashboard/monthly-summary${toQuery({ year, month })}`,
     ),
+
+  previewTransactionsCsv: (file: File) =>
+    upload<TransactionCsvPreview>("/imports/transactions-csv/preview", file),
+  confirmTransactionsCsv: (file: File) =>
+    upload<TransactionCsvImportResult>("/imports/transactions-csv/confirm", file),
+  getTransactionsCsvUrl: () => buildApiUrl("/exports/transactions.csv"),
 };

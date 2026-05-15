@@ -1,12 +1,8 @@
-from collections.abc import Generator
 from datetime import date
 from decimal import Decimal
 
-import pytest
-from sqlalchemy.pool import StaticPool
-from sqlmodel import SQLModel, Session, create_engine
+from sqlmodel import Session
 
-from app import models  # noqa: F401
 from app.models.account import AccountType
 from app.models.category import CategoryType
 from app.models.transaction import TransactionType
@@ -15,19 +11,6 @@ from app.schemas.account_schema import AccountCreate
 from app.schemas.category_schema import CategoryCreate
 from app.schemas.transaction_schema import TransactionCreate
 from app.services import account_service, transaction_service
-
-
-@pytest.fixture(name="session")
-def session_fixture() -> Generator[Session, None, None]:
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    SQLModel.metadata.create_all(engine)
-
-    with Session(engine) as session:
-        yield session
 
 
 def create_account(

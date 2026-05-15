@@ -102,6 +102,23 @@ sqlite:////app/data/finance.db
 
 The generated SQLite database is intentionally ignored by git.
 
+## Backup
+
+All local data is stored in the SQLite database file:
+
+```text
+./data/finance.db
+```
+
+To back up the app, stop the containers and copy that file to a safe location:
+
+```bash
+docker compose down
+cp ./data/finance.db ./data/finance.backup.db
+```
+
+To restore a backup, stop the containers and replace `./data/finance.db` with the backed-up database file.
+
 ## Accounts API
 
 Accounts can be managed from the FastAPI docs at http://localhost:8000/docs.
@@ -203,6 +220,26 @@ Example transfer request:
 }
 ```
 
+## CSV Import And Export
+
+Transactions can be imported from CSV files on the Import page at http://localhost:8080.
+
+The basic CSV format expects these columns:
+
+```text
+date,description,amount,account_name,category_name,transaction_type
+```
+
+The importer previews rows before saving them. It validates that referenced accounts and categories already exist, that dates and amounts are valid, and that the transaction type is one of `income`, `expense`, or `transfer`. Income and expense rows require an existing category with the matching category type.
+
+Available endpoints:
+
+- `POST /imports/transactions-csv/preview`
+- `POST /imports/transactions-csv/confirm`
+- `GET /exports/transactions.csv`
+
+The Import page also includes a download button for exporting all transactions as CSV.
+
 ## Budgets API
 
 Monthly budgets can be managed from the FastAPI docs at http://localhost:8000/docs.
@@ -242,11 +279,15 @@ Monthly summary returns total income, total expense, net savings, savings rate, 
 
 Yearly summary returns one aggregate row per month.
 
-Backend tests can be run inside the backend container once dependencies are built:
+## Tests
+
+Backend tests can be run with a single Docker Compose command:
 
 ```bash
 docker compose run --rm backend pytest
 ```
+
+The pytest suite uses temporary SQLite databases and does not read from or write to the real local database at `./data/finance.db`.
 
 To start only the backend service:
 

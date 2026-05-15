@@ -1,35 +1,6 @@
-from collections.abc import Generator
 from decimal import Decimal
 
-import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.pool import StaticPool
-from sqlmodel import SQLModel, Session, create_engine
-
-from app import models  # noqa: F401
-from app.database import get_session
-from app.main import app
-
-
-@pytest.fixture(name="client")
-def client_fixture() -> Generator[TestClient, None, None]:
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    SQLModel.metadata.create_all(engine)
-
-    def get_test_session() -> Generator[Session, None, None]:
-        with Session(engine) as session:
-            yield session
-
-    app.dependency_overrides[get_session] = get_test_session
-    client = TestClient(app)
-
-    yield client
-
-    app.dependency_overrides.clear()
 
 
 def create_account(client: TestClient, name: str) -> int:
@@ -161,6 +132,26 @@ def test_reject_expense_with_income_category(client: TestClient) -> None:
 
     assert response.status_code == 400
     assert response.json()["detail"] == "expense transaction must use an expense category"
+
+
+def test_reject_income_with_expense_category(client: TestClient) -> None:
+    account_id = create_account(client, "Checking")
+    category_id = create_category(client, "Supermarket", "expense")
+
+    response = client.post(
+        "/transactions",
+        json={
+            "transaction_type": "income",
+            "amount": "15.00",
+            "date": "2026-05-11",
+            "description": "Wrong category",
+            "account_id": account_id,
+            "category_id": category_id,
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "income transaction must use an income category"
 
 
 def test_filter_transactions(client: TestClient) -> None:

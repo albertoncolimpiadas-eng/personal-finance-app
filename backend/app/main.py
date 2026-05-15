@@ -9,7 +9,9 @@ from app.routers.account_router import router as account_router
 from app.routers.budget_router import router as budget_router
 from app.routers.category_router import router as category_router
 from app.routers.dashboard_router import router as dashboard_router
+from app.routers.export_router import router as export_router
 from app.routers.health import router as health_router
+from app.routers.import_router import router as import_router
 from app.routers.transaction_router import router as transaction_router
 from app.services.category_service import seed_default_categories
 
@@ -29,4 +31,6 @@ app.include_router(category_router)
 app.include_router(transaction_router)
 app.include_router(budget_router)
 app.include_router(dashboard_router)
+app.include_router(import_router)
+app.include_router(export_router)
 app.include_router(health_router)

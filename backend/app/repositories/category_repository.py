@@ -12,6 +12,11 @@ def get_category(session: Session, category_id: int) -> Category | None:
     return session.get(Category, category_id)
 
 
+def get_category_by_name(session: Session, name: str) -> Category | None:
+    statement = select(Category).where(Category.name == name)
+    return session.exec(statement).first()
+
+
 def create_category(session: Session, category_create: CategoryCreate) -> Category:
     category = Category.model_validate(category_create)
     session.add(category)

@@ -108,3 +108,27 @@ export type DashboardMonthlySummary = {
   income_by_category: CategoryAggregate[];
   account_balances: AccountSummary[];
 };
+
+export type TransactionCsvPreviewRow = {
+  row_number: number;
+  date: string;
+  description: string;
+  amount: string;
+  account_name: string;
+  category_name: string | null;
+  transaction_type: string;
+  valid: boolean;
+  errors: string[];
+};
+
+export type TransactionCsvPreview = {
+  rows: TransactionCsvPreviewRow[];
+  valid_count: number;
+  invalid_count: number;
+};
+
+export type TransactionCsvImportResult = {
+  imported_count: number;
+  skipped_count: number;
+  rows: TransactionCsvPreviewRow[];
+};

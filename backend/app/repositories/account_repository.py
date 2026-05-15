@@ -12,6 +12,11 @@ def get_account(session: Session, account_id: int) -> Account | None:
     return session.get(Account, account_id)
 
 
+def get_account_by_name(session: Session, name: str) -> Account | None:
+    statement = select(Account).where(Account.name == name)
+    return session.exec(statement).first()
+
+
 def create_account(session: Session, account_create: AccountCreate) -> Account:
     account = Account.model_validate(account_create)
     session.add(account)

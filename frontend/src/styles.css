@@ -21,6 +21,18 @@ button {
   padding: 0.5rem 0.8rem;
 }
 
+a.button-link {
+  align-items: center;
+  background: #0f766e;
+  border-radius: 6px;
+  color: white;
+  display: inline-flex;
+  font-weight: 700;
+  min-height: 2.25rem;
+  padding: 0.5rem 0.8rem;
+  text-decoration: none;
+}
+
 button:disabled { cursor: not-allowed; opacity: 0.6; }
 
 input, select {
