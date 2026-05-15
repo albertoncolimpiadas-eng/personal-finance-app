@@ -107,7 +107,9 @@ Accounts can be managed from the FastAPI docs at http://localhost:8000/docs.
 Available endpoints:
 
 - `GET /accounts`
+- `GET /accounts/summary`
 - `GET /accounts/{account_id}`
+- `GET /accounts/{account_id}/balance`
 - `POST /accounts`
 - `PUT /accounts/{account_id}`
 - `DELETE /accounts/{account_id}`
@@ -122,6 +124,8 @@ Example create request:
   "initial_balance": "0"
 }
 ```
+
+Account balances are calculated from transactions at request time. The app does not store `current_balance` as an editable database field.
 
 ## Categories API
 

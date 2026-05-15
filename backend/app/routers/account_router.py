@@ -4,7 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlmodel import Session
 
 from app.database import get_session
-from app.schemas.account_schema import AccountCreate, AccountRead, AccountUpdate
+from app.schemas.account_schema import (
+    AccountBalance,
+    AccountCreate,
+    AccountRead,
+    AccountSummary,
+    AccountUpdate,
+)
 from app.services import account_service
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
@@ -15,6 +21,20 @@ SessionDependency = Annotated[Session, Depends(get_session)]
 @router.get("", response_model=list[AccountRead])
 def list_accounts(session: SessionDependency) -> list[AccountRead]:
     return account_service.list_accounts(session)
+
+
+@router.get("/summary", response_model=list[AccountSummary])
+def list_account_summaries(session: SessionDependency) -> list[AccountSummary]:
+    return account_service.list_account_summaries(session)
+
+
+@router.get("/{account_id}/balance", response_model=AccountBalance)
+def get_account_balance(account_id: int, session: SessionDependency) -> AccountBalance:
+    account_balance = account_service.get_account_balance(session, account_id)
+    if account_balance is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
+
+    return account_balance
 
 
 @router.get("/{account_id}", response_model=AccountRead)

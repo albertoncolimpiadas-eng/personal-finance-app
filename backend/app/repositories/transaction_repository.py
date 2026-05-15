@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlmodel import Session, col, select
+from sqlmodel import Session, col, or_, select
 
 from app.models.transaction import Transaction, TransactionType
 from app.schemas.transaction_schema import TransactionCreate, TransactionUpdate
@@ -36,6 +36,19 @@ def list_transactions(
 
 def get_transaction(session: Session, transaction_id: int) -> Transaction | None:
     return session.get(Transaction, transaction_id)
+
+
+def list_transactions_for_account_balance(
+    session: Session,
+    account_id: int,
+) -> list[Transaction]:
+    statement = select(Transaction).where(
+        or_(
+            Transaction.account_id == account_id,
+            Transaction.target_account_id == account_id,
+        )
+    )
+    return list(session.exec(statement).all())
 
 
 def create_transaction(

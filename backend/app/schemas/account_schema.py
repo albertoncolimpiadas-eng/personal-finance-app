@@ -39,3 +39,17 @@ class AccountUpdate(AccountBase):
 class AccountRead(AccountBase):
     id: int
     created_at: datetime
+
+
+class AccountBalance(SQLModel):
+    account_id: int
+    current_balance: Decimal
+
+
+class AccountSummary(SQLModel):
+    id: int
+    name: str
+    type: AccountType
+    currency: str
+    initial_balance: Decimal
+    current_balance: Decimal
