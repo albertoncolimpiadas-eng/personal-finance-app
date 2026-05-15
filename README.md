@@ -100,6 +100,29 @@ sqlite:////app/data/finance.db
 
 The generated SQLite database is intentionally ignored by git.
 
+## Accounts API
+
+Accounts can be managed from the FastAPI docs at http://localhost:8000/docs.
+
+Available endpoints:
+
+- `GET /accounts`
+- `GET /accounts/{account_id}`
+- `POST /accounts`
+- `PUT /accounts/{account_id}`
+- `DELETE /accounts/{account_id}`
+
+Example create request:
+
+```json
+{
+  "name": "Main checking",
+  "type": "current_account",
+  "currency": "EUR",
+  "initial_balance": "0"
+}
+```
+
 Backend tests can be run inside the backend container once dependencies are built:
 
 ```bash

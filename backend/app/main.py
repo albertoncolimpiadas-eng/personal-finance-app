@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database import create_db_and_tables
+from app.routers.account_router import router as account_router
 from app.routers.health import router as health_router
 
 
@@ -15,4 +16,5 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="Personal Finance API", lifespan=lifespan)
 
+app.include_router(account_router)
 app.include_router(health_router)

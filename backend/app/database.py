@@ -1,6 +1,7 @@
 import os
+from collections.abc import Generator
 
-from sqlmodel import SQLModel, create_engine
+from sqlmodel import SQLModel, Session, create_engine
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:////app/data/finance.db")
 
@@ -12,3 +13,8 @@ def create_db_and_tables() -> None:
     from app import models  # noqa: F401
 
     SQLModel.metadata.create_all(engine)
+
+
+def get_session() -> Generator[Session, None, None]:
+    with Session(engine) as session:
+        yield session

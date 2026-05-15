@@ -10,13 +10,6 @@ def utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-class AccountType(str, Enum):
-    CASH = "cash"
-    CURRENT_ACCOUNT = "current_account"
-    SAVINGS = "savings"
-    CREDIT_CARD = "credit_card"
-
-
 class CategoryType(str, Enum):
     INCOME = "income"
     EXPENSE = "expense"
@@ -26,21 +19,6 @@ class TransactionType(str, Enum):
     INCOME = "income"
     EXPENSE = "expense"
     TRANSFER = "transfer"
-
-
-class Account(SQLModel, table=True):
-    __tablename__ = "accounts"
-
-    id: int | None = Field(default=None, primary_key=True)
-    name: str = Field(index=True)
-    type: AccountType
-    currency: str = Field(default="USD", max_length=3)
-    initial_balance: Decimal = Field(
-        default=Decimal("0.00"),
-        max_digits=14,
-        decimal_places=2,
-    )
-    created_at: datetime = Field(default_factory=utc_now)
 
 
 class Category(SQLModel, table=True):

@@ -1,6 +1,5 @@
+from app.models.account import Account, AccountType
 from app.models.finance import (
-    Account,
-    AccountType,
     Budget,
     Category,
     CategoryType,
