@@ -20,13 +20,15 @@ This project does not use Docker Desktop, Kubernetes, cloud deployment, bank syn
 │   │   ├── main.py
 │   │   ├── database.py
 │   │   ├── models/
+│   │   │   └── finance.py
 │   │   ├── repositories/
 │   │   ├── routers/
 │   │   │   └── health.py
 │   │   ├── schemas/
 │   │   └── services/
 │   ├── tests/
-│   │   └── test_health.py
+│   │   ├── test_health.py
+│   │   └── test_models.py
 │   ├── Dockerfile
 │   └── requirements.txt
 ├── data/
@@ -84,7 +86,19 @@ docker compose down
 ```
 
 4. Visit http://localhost:8000/docs and confirm the FastAPI documentation opens.
-5. Confirm the local SQLite persistence folder exists at `./data`.
+5. Confirm the local SQLite database exists at `./data/finance.db`.
+
+## SQLite Persistence
+
+The backend creates database tables on application startup with SQLModel.
+
+The local `./data` folder is mounted into the backend container at `/app/data`, and the app uses:
+
+```text
+sqlite:////app/data/finance.db
+```
+
+The generated SQLite database is intentionally ignored by git.
 
 Backend tests can be run inside the backend container once dependencies are built:
 

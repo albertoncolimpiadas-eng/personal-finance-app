@@ -9,4 +9,6 @@ engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
 
 def create_db_and_tables() -> None:
+    from app import models  # noqa: F401
+
     SQLModel.metadata.create_all(engine)
