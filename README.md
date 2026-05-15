@@ -1,15 +1,33 @@
 # Personal Finance App
 
-Local-first personal finance web app scaffold.
+Local-first personal finance web app for tracking accounts, categories, transactions, monthly budgets, dashboard summaries, CSV import/export, and local SQLite backups.
+
+The app is intended to run on one local machine with Docker Compose. It does not use Docker Desktop, Kubernetes, cloud deployment, bank synchronization, multi-user authentication, PostgreSQL, or microservices.
 
 ## Stack
 
-- Backend: Python, FastAPI, SQLModel, SQLite
+- Backend: Python, FastAPI, SQLModel, SQLite, pytest
 - Frontend: React, Vite, TypeScript
-- Runtime: Docker Compose with Docker Engine inside Rocky Linux on WSL2
-- Database file: `./data/finance.db`, mounted in the backend container as `/app/data/finance.db`
+- Runtime: Docker Engine inside Rocky Linux on WSL2
+- Container entry point: Docker Compose plugin through `docker compose`
+- Database file: `./data/finance.db`, mounted into the backend container as `/app/data/finance.db`
 
-This project does not use Docker Desktop, Kubernetes, cloud deployment, bank synchronization, multi-user authentication, PostgreSQL, or microservices.
+## Environment Assumptions
+
+- Rocky Linux running on WSL2.
+- Docker Engine is installed directly inside Rocky WSL.
+- Docker Desktop is not required.
+- Docker Compose is available as the Docker CLI plugin.
+- Use Rocky/RHEL-compatible commands.
+- Use `dnf`, not `apt`, when installing system packages.
+- Use `docker compose`, not `docker-compose`.
+
+Useful checks:
+
+```bash
+docker compose version
+sudo systemctl status docker
+```
 
 ## Project Structure
 
@@ -17,18 +35,14 @@ This project does not use Docker Desktop, Kubernetes, cloud deployment, bank syn
 .
 ├── backend/
 │   ├── app/
-│   │   ├── main.py
 │   │   ├── database.py
+│   │   ├── main.py
 │   │   ├── models/
-│   │   │   └── finance.py
 │   │   ├── repositories/
 │   │   ├── routers/
-│   │   │   └── health.py
 │   │   ├── schemas/
 │   │   └── services/
 │   ├── tests/
-│   │   ├── test_health.py
-│   │   └── test_models.py
 │   ├── Dockerfile
 │   └── requirements.txt
 ├── data/
@@ -36,28 +50,33 @@ This project does not use Docker Desktop, Kubernetes, cloud deployment, bank syn
 ├── frontend/
 │   ├── src/
 │   │   ├── api/
-│   │   │   └── client.ts
 │   │   ├── components/
 │   │   ├── pages/
-│   │   │   └── HomePage.tsx
 │   │   ├── types/
 │   │   ├── App.tsx
 │   │   ├── main.tsx
-│   │   ├── styles.css
-│   │   └── vite-env.d.ts
+│   │   └── styles.css
 │   ├── Dockerfile
-│   ├── index.html
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── tsconfig.node.json
-│   └── vite.config.ts
+│   └── package.json
 ├── compose.yaml
+├── CHANGELOG.md
 └── README.md
 ```
 
-## Run The App
+## Setup
 
 From the project root:
+
+```bash
+mkdir -p data
+docker compose config
+```
+
+The first command keeps the local SQLite mount target available. The second command validates the Compose file.
+
+## Run The App
+
+Start both services:
 
 ```bash
 docker compose up --build
@@ -69,32 +88,53 @@ Then open:
 - Backend health check: http://localhost:8000/health
 - Backend API docs: http://localhost:8000/docs
 
-The frontend includes pages for Dashboard, Accounts, Transactions, Categories, Budgets, and Import. It checks `GET /health` and shows backend reachability in the header.
-
-Stop the app with:
+Stop the app:
 
 ```bash
 docker compose down
 ```
 
-## Manual Test
+Start only the backend:
+
+```bash
+docker compose up --build backend
+```
+
+## Manual Smoke Test
 
 1. Start the app with `docker compose up --build`.
 2. Visit http://localhost:8080 and confirm the React app loads.
-3. Visit http://localhost:8000/health and confirm it returns:
+3. Confirm the header shows the backend as reachable.
+4. Visit http://localhost:8000/health and confirm it returns:
 
 ```json
 {"status":"ok","service":"personal-finance-backend"}
 ```
 
-4. Visit http://localhost:8000/docs and confirm the FastAPI documentation opens.
-5. Confirm the local SQLite database exists at `./data/finance.db`.
+5. Visit http://localhost:8000/docs and confirm FastAPI documentation opens.
+6. Confirm the local SQLite database exists at `./data/finance.db` after backend startup.
+
+## Tests
+
+Run backend tests with one command:
+
+```bash
+docker compose run --rm backend pytest
+```
+
+The pytest suite uses temporary SQLite databases and does not read from or write to the real local database at `./data/finance.db`.
+
+Build the frontend:
+
+```bash
+docker compose run --rm frontend npm run build
+```
 
 ## SQLite Persistence
 
 The backend creates database tables on application startup with SQLModel.
 
-The local `./data` folder is mounted into the backend container at `/app/data`, and the app uses:
+The local `./data` folder is mounted into the backend container at `/app/data`, and the backend uses:
 
 ```text
 sqlite:////app/data/finance.db
@@ -102,28 +142,28 @@ sqlite:////app/data/finance.db
 
 The generated SQLite database is intentionally ignored by git.
 
-## Backup
+## Backup And Restore
 
-All local data is stored in the SQLite database file:
+All local application data is stored in:
 
 ```text
 ./data/finance.db
 ```
 
-To back up the app, stop the containers and copy that file to a safe location:
+Back up the database by stopping the containers and copying that file:
 
 ```bash
 docker compose down
 cp ./data/finance.db ./data/finance.backup.db
 ```
 
-To restore a backup, stop the containers and replace `./data/finance.db` with the backed-up database file.
+Restore a backup by stopping the containers and replacing `./data/finance.db` with the backed-up database file.
 
-## Accounts API
+## API Overview
 
-Accounts can be managed from the FastAPI docs at http://localhost:8000/docs.
+All API endpoints are documented by FastAPI at http://localhost:8000/docs.
 
-Available endpoints:
+Accounts:
 
 - `GET /accounts`
 - `GET /accounts/summary`
@@ -133,24 +173,7 @@ Available endpoints:
 - `PUT /accounts/{account_id}`
 - `DELETE /accounts/{account_id}`
 
-Example create request:
-
-```json
-{
-  "name": "Main checking",
-  "type": "current_account",
-  "currency": "EUR",
-  "initial_balance": "0"
-}
-```
-
-Account balances are calculated from transactions at request time. The app does not store `current_balance` as an editable database field.
-
-## Categories API
-
-Categories can be managed from the FastAPI docs at http://localhost:8000/docs.
-
-Available endpoints:
+Categories:
 
 - `GET /categories`
 - `GET /categories/{category_id}`
@@ -158,26 +181,7 @@ Available endpoints:
 - `PUT /categories/{category_id}`
 - `DELETE /categories/{category_id}`
 
-Example create request:
-
-```json
-{
-  "name": "Groceries",
-  "type": "expense",
-  "color": "#0f766e"
-}
-```
-
-When the category table is empty, the backend seeds these defaults on startup:
-
-- Expense: Supermarket, Housing, Transport, Restaurants, Health, Leisure, Subscriptions
-- Income: Salary, Freelance, Other income
-
-## Transactions API
-
-Transactions can be managed from the FastAPI docs at http://localhost:8000/docs.
-
-Available endpoints:
+Transactions:
 
 - `GET /transactions`
 - `GET /transactions/{transaction_id}`
@@ -185,66 +189,9 @@ Available endpoints:
 - `PUT /transactions/{transaction_id}`
 - `DELETE /transactions/{transaction_id}`
 
-`GET /transactions` supports these optional filters:
+`GET /transactions` supports `account_id`, `category_id`, `transaction_type`, `date_from`, `date_to`, and `text` filters.
 
-- `account_id`
-- `category_id`
-- `transaction_type`
-- `date_from`
-- `date_to`
-- `text`
-
-Example income request:
-
-```json
-{
-  "transaction_type": "income",
-  "amount": "2500.00",
-  "date": "2026-05-15",
-  "description": "May salary",
-  "account_id": 1,
-  "category_id": 8
-}
-```
-
-Example transfer request:
-
-```json
-{
-  "transaction_type": "transfer",
-  "amount": "300.00",
-  "date": "2026-05-15",
-  "description": "Move to savings",
-  "account_id": 1,
-  "target_account_id": 2
-}
-```
-
-## CSV Import And Export
-
-Transactions can be imported from CSV files on the Import page at http://localhost:8080.
-
-The basic CSV format expects these columns:
-
-```text
-date,description,amount,account_name,category_name,transaction_type
-```
-
-The importer previews rows before saving them. It validates that referenced accounts and categories already exist, that dates and amounts are valid, and that the transaction type is one of `income`, `expense`, or `transfer`. Income and expense rows require an existing category with the matching category type.
-
-Available endpoints:
-
-- `POST /imports/transactions-csv/preview`
-- `POST /imports/transactions-csv/confirm`
-- `GET /exports/transactions.csv`
-
-The Import page also includes a download button for exporting all transactions as CSV.
-
-## Budgets API
-
-Monthly budgets can be managed from the FastAPI docs at http://localhost:8000/docs.
-
-Available endpoints:
+Budgets:
 
 - `GET /budgets`
 - `GET /budgets/monthly-summary?year=YYYY&month=M`
@@ -253,60 +200,39 @@ Available endpoints:
 - `PUT /budgets/{budget_id}`
 - `DELETE /budgets/{budget_id}`
 
-Budgets are allowed only for expense categories, and only one budget can exist for each category/year/month.
-
-Example create request:
-
-```json
-{
-  "category_id": 1,
-  "year": 2026,
-  "month": 5,
-  "limit_amount": "500.00"
-}
-```
-
-## Dashboard API
-
-Dashboard summaries are calculated from transactions and account balances.
-
-Available endpoints:
+Dashboard:
 
 - `GET /dashboard/monthly-summary?year=YYYY&month=M`
 - `GET /dashboard/yearly-summary?year=YYYY`
 
-Monthly summary returns total income, total expense, net savings, savings rate, category breakdowns, and account balances.
+CSV import/export:
 
-Yearly summary returns one aggregate row per month.
+- `POST /imports/transactions-csv/preview`
+- `POST /imports/transactions-csv/confirm`
+- `GET /exports/transactions.csv`
 
-## Tests
+Health:
 
-Backend tests can be run with a single Docker Compose command:
+- `GET /health`
 
-```bash
-docker compose run --rm backend pytest
+## CSV Import Format
+
+The basic CSV import format expects these columns:
+
+```text
+date,description,amount,account_name,category_name,transaction_type
 ```
 
-The pytest suite uses temporary SQLite databases and does not read from or write to the real local database at `./data/finance.db`.
+The importer previews rows before saving them. It validates that referenced accounts and categories already exist, dates and amounts are valid, and transaction type is one of `income`, `expense`, or `transfer`. Income and expense rows require an existing category with the matching category type.
 
-To start only the backend service:
+The frontend Import page also exposes a button to download all transactions as CSV.
 
-```bash
-docker compose up --build backend
-```
+## Known Limitations
 
-## Rocky Linux Notes
-
-Use Rocky/RHEL-compatible commands. For package installation, use `dnf`, not `apt`.
-
-Example Docker Engine status check:
-
-```bash
-sudo systemctl status docker
-```
-
-Use Compose through the Docker CLI:
-
-```bash
-docker compose version
-```
+- Version 0.1 is local-only and single-user.
+- There is no authentication or authorization.
+- There is no bank synchronization or automatic transaction matching.
+- CSV import requires referenced accounts and categories to exist before confirming the import.
+- CSV transfer import preview is intentionally limited because imported transfer rows need a target account.
+- SQLite is the only supported database.
+- There is no cloud deployment, Kubernetes setup, mobile app, OAuth, or payment integration.

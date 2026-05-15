@@ -11,7 +11,11 @@ router = APIRouter(prefix="/exports", tags=["exports"])
 SessionDependency = Annotated[Session, Depends(get_session)]
 
 
-@router.get("/transactions.csv")
+@router.get(
+    "/transactions.csv",
+    response_class=Response,
+    summary="Export transactions as CSV",
+)
 def export_transactions(session: SessionDependency) -> Response:
     csv_content = export_transactions_csv(session)
     return Response(
