@@ -123,6 +123,80 @@ Example create request:
 }
 ```
 
+## Categories API
+
+Categories can be managed from the FastAPI docs at http://localhost:8000/docs.
+
+Available endpoints:
+
+- `GET /categories`
+- `GET /categories/{category_id}`
+- `POST /categories`
+- `PUT /categories/{category_id}`
+- `DELETE /categories/{category_id}`
+
+Example create request:
+
+```json
+{
+  "name": "Groceries",
+  "type": "expense",
+  "color": "#0f766e"
+}
+```
+
+When the category table is empty, the backend seeds these defaults on startup:
+
+- Expense: Supermarket, Housing, Transport, Restaurants, Health, Leisure, Subscriptions
+- Income: Salary, Freelance, Other income
+
+## Transactions API
+
+Transactions can be managed from the FastAPI docs at http://localhost:8000/docs.
+
+Available endpoints:
+
+- `GET /transactions`
+- `GET /transactions/{transaction_id}`
+- `POST /transactions`
+- `PUT /transactions/{transaction_id}`
+- `DELETE /transactions/{transaction_id}`
+
+`GET /transactions` supports these optional filters:
+
+- `account_id`
+- `category_id`
+- `transaction_type`
+- `date_from`
+- `date_to`
+- `text`
+
+Example income request:
+
+```json
+{
+  "transaction_type": "income",
+  "amount": "2500.00",
+  "date": "2026-05-15",
+  "description": "May salary",
+  "account_id": 1,
+  "category_id": 8
+}
+```
+
+Example transfer request:
+
+```json
+{
+  "transaction_type": "transfer",
+  "amount": "300.00",
+  "date": "2026-05-15",
+  "description": "Move to savings",
+  "account_id": 1,
+  "target_account_id": 2
+}
+```
+
 Backend tests can be run inside the backend container once dependencies are built:
 
 ```bash
